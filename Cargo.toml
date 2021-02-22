@@ -1,5 +1,5 @@
 [package]
-name = "clay"
+name = "tuscot"
 version = "0.1.0"
 authors = ["Rishi Kothari <itsrishikothari@gmail.com>"]
 edition = "2018"
@@ -7,11 +7,11 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "claylang"
+name = "tuscot"
 path = "src/lib.rs"
 
 [[bin]]
-name = "clay"
+name = "tuscot"
 path = "src/main.rs"
 
 [dependencies]
