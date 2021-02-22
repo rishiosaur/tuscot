@@ -41,6 +41,7 @@ pub enum TokenType<'a> {
     Integer(usize),
     Float(f32),
     String(&'a str),
+    Boolean(bool),
 
     // Keywords
     Ident(&'a str),
@@ -55,6 +56,8 @@ impl<'a> TokenType<'a> {
             "match" => TokenType::Match,
             "import" => TokenType::Import,
             "return" => TokenType::Return,
+            "true" => TokenType::Boolean(true),
+            "false" => TokenType::Boolean(false),
             _ => TokenType::Ident(string),
         }
     }

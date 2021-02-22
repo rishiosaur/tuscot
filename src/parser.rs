@@ -170,10 +170,16 @@ impl<'a> Parser<'a> {
         })
     }
 
+    pub fn parse_boolean_literal(&self) -> Box<Expression<'a>> {
+        Box::new(Expression::BooleanLiteral {
+            token: self.get_current_token().unwrap(),
+        })
+    }
+
     pub fn parse_ident_literal(&mut self, already: Option<Vec<Token<'a>>>) -> Box<Expression<'a>> {
         let mut idents: Vec<Token<'a>> = Vec::new();
         if let Some(z) = already {
-            // self.consume_token();
+            // self.consume_token()
             return Box::new(Expression::NormalIdentifier { idents: z });
         }
         idents.push(self.get_current_token().unwrap());
@@ -329,6 +335,21 @@ impl<'a> Parser<'a> {
             elements: expressions,
         });
     }
+
+    pub fn parse_prefix_expression(&mut self) -> Box<Expression<'a>> {
+        let token = self.get_current_token().unwrap();
+        self.consume_token();
+        let right = self
+            .parse_expression(Precedence::PREFIX, None)
+            .unwrap_or_else(|| {
+                error(format!(
+                    "{} Implicit return of function must be followed by an expression.",
+                    token.position
+                ));
+                panic!();
+            });
+        return Box::new(Expression::PrefixExpression { token, right });
+    }
 }
 
 impl<'a> Parser<'a> {
@@ -422,7 +443,10 @@ impl<'a> Parser<'a> {
                     }
                 }
             } else {
-                error(format!("Expected expression after assignment operator."));
+                error(format!(
+                    "{} Expected expression after assignment operator.",
+                    token.position
+                ));
                 panic!();
             }
         } else {
@@ -528,6 +552,17 @@ impl<'a> Parser<'a> {
             (TokenType::Bar, true) => (true, Some(self.parse_function_expression())),
             (TokenType::Ident(_), false) => (true, None),
             (TokenType::Ident(_), true) => (true, Some(self.parse_ident_literal(idents))),
+            (TokenType::Ampersand, false) => (true, None),
+            (TokenType::Ampersand, true) => (true, Some(self.parse_prefix_expression())),
+            (TokenType::Asterisk, false) => (true, None),
+            (TokenType::Asterisk, true) => (true, Some(self.parse_prefix_expression())),
+            (TokenType::Minus, false) => (true, None),
+            (TokenType::Minus, true) => (true, Some(self.parse_prefix_expression())),
+            (TokenType::Bang, false) => (true, None),
+            (TokenType::Bang, true) => (true, Some(self.parse_prefix_expression())),
+            (TokenType::Boolean(_), false) => (true, None),
+            (TokenType::Boolean(_), true) => (true, Some(self.parse_boolean_literal())),
+
             _ => (false, None),
         }
     }
@@ -664,11 +699,9 @@ impl<'a> Parser<'a> {
 
         while let Some(tok) = self.get_current_token() {
             if tok.kind != end {
-                // self.consume_token();
                 if let Some(expr) = self.parse_expression(Precedence::LOWEST, None) {
                     exprs.push(expr)
                 }
-                // exprs.push(.unwrap());
                 self.consume_token();
             } else {
                 break;
@@ -710,7 +743,9 @@ impl<'a> Parser<'a> {
                                 let token = self.get_current_token().unwrap();
                                 self.consume_token();
                                 let expression =
-                                    self.parse_expression(Precedence::LOWEST, None).unwrap(); // TODO: Error check
+                                    self.parse_expression(Precedence::LOWEST, None).unwrap_or_else(|| { error(format!("{} Implicit return of function must be followed by an expression.", token.position));
+                                    panic!();
+                                 }); // TODO: Error check
                                 statements.push(Statement::ReturnStatement {
                                     token,
                                     value: expression,
@@ -739,8 +774,6 @@ impl<'a> Parser<'a> {
                 }
             }
 
-            // self.expect_peek(TokenType::Arrow, "defining a match clause");
-
             while let Some(peek) = self.get_peek_token() {
                 match peek.kind {
                     TokenType::Comma => {
@@ -755,7 +788,6 @@ impl<'a> Parser<'a> {
                         }
                     }
                     _ => {
-                        // self.consume_token();
                         break;
                     }
                 }
@@ -776,7 +808,9 @@ impl<'a> Parser<'a> {
                     _ => {
                         let token = self.get_current_token().unwrap();
                         self.consume_token();
-                        let expression = self.parse_expression(Precedence::LOWEST, None).unwrap(); // TODO: Error check
+                        let expression = self.parse_expression(Precedence::LOWEST, None).unwrap_or_else(|| { error(format!("{} Implicit return of function must be followed by an expression.", token.position));
+                        panic!();
+                     });
                         statements.push(Statement::ReturnStatement {
                             token,
                             value: expression,
