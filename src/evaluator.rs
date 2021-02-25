@@ -196,7 +196,7 @@ pub fn eval_expr<'a>(
 
                 if let Object::Function { .. } = func {
                     let args = eval_expressions(parameters, context);
-                    return apply_function(func, args);
+                    return apply_function(&mut func, args);
                 }
 
                 error(format!(
@@ -290,7 +290,7 @@ fn eval_expressions<'a>(
     res
 }
 
-fn apply_function<'a>(func: &'a Object<'a>, args: Vec<&'a Object<'a>>) -> &'a Object<'a> {
+fn apply_function<'a>(func: &'a mut Object<'a>, args: Vec<&'a Object<'a>>) -> &'a Object<'a> {
     match func {
         Object::Function {
             parameters,
@@ -308,7 +308,7 @@ fn apply_function<'a>(func: &'a Object<'a>, args: Vec<&'a Object<'a>>) -> &'a Ob
     }
 }
 
-fn extend_local_ctx<'a>(func: &'a Object<'a>, args: Vec<&'a Object<'a>>) -> Context<'a> {
+fn extend_local_ctx<'a>(func: &'a mut Object<'a>, args: Vec<&'a Object<'a>>) -> Context<'a> {
     if let Object::Function {
         parameters,
         body,
