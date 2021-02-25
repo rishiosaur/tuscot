@@ -42,6 +42,10 @@ impl Precedence {
             TokenType::Minus => Some(Precedence::SUM),
             TokenType::Asterisk => Some(Precedence::PRODUCT),
             TokenType::Slash => Some(Precedence::PRODUCT),
+            TokenType::PlusEqual => Some(Precedence::SUM),
+            TokenType::MinusEqual => Some(Precedence::SUM),
+            TokenType::AsteriskEqual => Some(Precedence::PRODUCT),
+            TokenType::SlashEqual => Some(Precedence::PRODUCT),
             TokenType::LParen => Some(Precedence::CALL),
             TokenType::LBracket => Some(Precedence::INDEX),
             TokenType::Match => Some(Precedence::MATCH),
@@ -360,6 +364,18 @@ impl<'a> Parser<'a> {
                 TokenType::Import => self.parse_import_statement(),
                 TokenType::Ident(_) => self.parse_identifier_statement(),
                 TokenType::Return => self.parse_return_statement(),
+                TokenType::Asterisk => {
+                    let expr = self.parse_expression(Precedence::LOWEST, None).unwrap();
+                    self.expect_peek(TokenType::Equal, "defining a dereference update");
+                    let token = self.get_current_token().unwrap();
+                    self.consume_token();
+                    let right = self.parse_expression(Precedence::LOWEST, None).unwrap();
+                    return Some(Statement::UpdateStatement {
+                        token,
+                        ident: expr,
+                        expression: right
+                    })
+                }
                 _ => self.parse_expression_statement(None),
             };
         } else {
@@ -745,7 +761,7 @@ impl<'a> Parser<'a> {
                                 let expression =
                                     self.parse_expression(Precedence::LOWEST, None).unwrap_or_else(|| { error(format!("{} Implicit return of function must be followed by an expression.", token.position));
                                     panic!();
-                                 }); // TODO: Error check
+                                 });
                                 statements.push(Statement::ReturnStatement {
                                     token,
                                     value: expression,
