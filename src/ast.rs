@@ -33,15 +33,6 @@ pub enum Expression<'a> {
     FloatLiteral {
         token: Token<'a>,
     },
-    IndexExpression {
-        token: Token<'a>,
-        left: Box<Expression<'a>>,
-        index: Box<Expression<'a>>,
-    },
-    MapLiteral {
-        token: Token<'a>,
-        pairs: HashMap<Box<Expression<'a>>, Box<Expression<'a>>>,
-    },
     FunctionLiteral {
         token: Token<'a>,
         parameters: Box<Expression<'a>>,
@@ -64,12 +55,7 @@ pub enum Expression<'a> {
         left: Box<Expression<'a>>,
     },
 
-    IfExpression {
-        token: Token<'a>,
-        condition: Box<Expression<'a>>,
-        consequence: Statement<'a>,
-        alternative: Statement<'a>,
-    },
+
 
     MatchExpression {
         token: Token<'a>,
@@ -113,4 +99,10 @@ pub enum Statement<'a> {
         token: Token<'a>,
         value: Token<'a>,
     },
+}
+
+enum ASTNodes {
+    Program,
+    Statement,
+    Expression,
 }
