@@ -4,11 +4,12 @@ use std::{
 };
 
 use colored::Colorize;
-use fs::read_to_string;
 
 mod ast;
 mod errors;
+mod evaluator;
 mod lexer;
+mod objects;
 mod parser;
 mod token;
 fn main() -> io::Result<()> {
@@ -34,8 +35,9 @@ fn main() -> io::Result<()> {
                     _ => {
                         let tokens = lexer::Lexer::new(input.trim()).collect::<Vec<_>>();
                         let stack = parser::Parser::new(tokens).parse_program();
+                        let evaluated = evaluator::eval(stack, &mut objects::Context::new(None));
 
-                        println!("\n{:#?}\n", stack);
+                        println!("\n{:#?}\n", evaluated);
                     }
                 }
             }

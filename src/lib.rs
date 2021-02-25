@@ -2,7 +2,9 @@
 
 mod ast;
 mod errors;
+mod evaluator;
 mod lexer;
+mod objects;
 mod parser;
 mod token;
 
